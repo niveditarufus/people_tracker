@@ -1,0 +1,13 @@
+train: ../data/train/images
+val: ../data/valid/images
+test: ../data/test/images
+
+nc: 1
+names: ['person']
+
+# roboflow:
+#   workspace: roboflow-universe-projects
+#   project: people-detection-thermal
+#   version: 1
+#   license: CC BY 4.0
+#   url: https://universe.roboflow.com/roboflow-universe-projects/people-detection-thermal/dataset/1
