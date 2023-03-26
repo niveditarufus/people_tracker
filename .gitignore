@@ -1,3 +1,6 @@
 data/
 runs/
 *.pt
+model/
+reid/lightning_logs/
+reid/images/
