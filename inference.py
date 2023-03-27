@@ -19,7 +19,7 @@ def inference_tracking(model_path, data_source, tracker_config="tracker.yaml", c
 
 def main():
     # inferencing pretrained YOLOv8 directly on the video
-    results = inference_tracking(model_path='runs/detect/train2/weights/best.pt', data_source="data/Walking Next to People.mp4")
+    results = inference_tracking(model_path='yolov8n.pt', data_source="data/DatasetVideo.mp4")
     counter_dict = {}
 
     for i,r in enumerate(results):
@@ -47,7 +47,7 @@ def main():
                 except:
                     pass
 
-        cv2.imwrite("output/detection1/"+str(i)+"_.jpg", r.plot())
+        cv2.imwrite("output/detection3/"+str(i)+"_.jpg", r.plot())
         # cv2.waitKey(0)
 
 
