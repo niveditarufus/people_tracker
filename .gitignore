@@ -4,3 +4,5 @@ runs/
 model/
 reid/lightning_logs/
 reid/images/
+post_process/images/
+output/

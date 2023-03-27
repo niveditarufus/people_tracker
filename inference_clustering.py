@@ -13,9 +13,7 @@ import matplotlib.pyplot as plt
 
 
 pretrained_model = YOLO('runs/detect/train2/weights/best.pt')
-
 results = pretrained_model(source="data/DatasetVideo.mp4", stream=True)  # generator of Results objects
-
 batch_size = 16
 
 def postprocess(features):
@@ -23,6 +21,8 @@ def postprocess(features):
     features = F.normalize(features)
     features = features.cpu().data.numpy()
     return features
+
+#batchify
 batch_patches = []
 for r in results:
     boxes = r.boxes.xyxy  # Boxes object for bbox outputs
@@ -31,7 +31,6 @@ for r in results:
     image = r.orig_img 
     patches = []
     
-
     for i,box in enumerate(boxes):
         tlbr = box.cpu().numpy().astype(int)
         patch = image[tlbr[1]:tlbr[3], tlbr[0]:tlbr[2], :]
@@ -49,28 +48,26 @@ for r in results:
         patches = torch.stack(patches, dim=0)
         batch_patches.append(patches)
 
-features = np.zeros((0, 1000))
+#load model for featurization
 model = models.resnet50(pretrained=True)
-state_dict_model = torch.load("model/custom_model_infrared/epoch=9-step=6140.ckpt")['state_dict']
+state_dict_model = torch.load("model/ft_ResNet50/net_last.pth")
 new_state_dict = OrderedDict()
 for k, v in state_dict_model.items():
-    if "model.model." in k:
-        name = k.replace("model.model.", "", 1)
-        new_state_dict[name] = v
-model.load_state_dict(new_state_dict)
-        
+        if "model." in k:
+            name = k.replace("model.", "", 1)
+            new_state_dict[name] = v
+model.load_state_dict(new_state_dict)     
 model.eval().cuda().half()
-print()
-for batch in batch_patches:
 
+#featurise
+features = np.zeros((0, 1000))
+for batch in batch_patches:
     emb = model(batch)
     feat = postprocess(emb)
-    
     features = np.vstack((features, feat))
 
-print(features.shape)
-db = DBSCAN(eps=0.009, min_samples=30).fit(features)
-print(len(db.labels_))
+#clustering
+db = DBSCAN(eps=0.001, min_samples=10).fit(features)
 
 core_samples_mask = np.zeros_like(db.labels_, dtype=bool)
 core_samples_mask[db.core_sample_indices_] = True
@@ -97,7 +94,5 @@ for k, col in zip(unique_labels, colors):
              markeredgecolor='k',
              markersize=6)
   
-plt.title('number of clusters: %d' % n_clusters_)
+plt.title('number of clusters/no.of people: %d' % n_clusters_)
 plt.savefig('test.png')
-  
-
